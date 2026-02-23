@@ -29,6 +29,8 @@ func NewLinkHundler(router *http.ServeMux, deps LinkHundlerDeps) {
 	router.HandleFunc("GET /{hash}", handler.GoTo())
 	router.Handle("PATCH /link/{id}", middlewere.IsAuthed(handler.Update(), deps.Config))
 	router.HandleFunc("DELETE /link/{id}", handler.Delete())
+	router.Handle("GET /link", middlewere.IsAuthed(handler.GetAll(), deps.Config))
+
 }
 
 func (handler *LinkHundler) Create() http.HandlerFunc {
@@ -115,5 +117,26 @@ func (handler *LinkHundler) Delete() http.HandlerFunc {
 			return
 		}
 		res.Json(w, nil, 200)
+	}
+}
+
+func (handler *LinkHundler) GetAll() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+		if err != nil {
+			http.Error(w, "Invalid limit", http.StatusBadRequest)
+			return
+		}
+		offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+		if err != nil {
+			http.Error(w, "Invalid offset", http.StatusBadRequest)
+			return
+		}
+		links := handler.LinkRepository.GetAll(limit, offset)
+		count := handler.LinkRepository.Count()
+		res.Json(w, GetAllLinkResponse{
+			Links: links,
+			Count: count,
+		}, 200)
 	}
 }
