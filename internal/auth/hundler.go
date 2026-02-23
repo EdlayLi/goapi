@@ -40,7 +40,9 @@ func (handler *AuthHundler) Login() http.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.NewJWT(handler.Config.Auth.Sectet).Create(email)
+		token, err := jwt.NewJWT(handler.Config.Auth.Sectet).Create(jwt.JWTData{
+			Email: email,
+		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -64,7 +66,9 @@ func (handler *AuthHundler) Register() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		token, err := jwt.NewJWT(handler.Config.Auth.Sectet).Create(email)
+		token, err := jwt.NewJWT(handler.Config.Auth.Sectet).Create(jwt.JWTData{
+			Email: email,
+		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

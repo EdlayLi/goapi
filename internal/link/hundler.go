@@ -1,9 +1,11 @@
 package link
 
 import (
+	"apigo/configs"
 	"apigo/pkg/middlewere"
 	"apigo/pkg/req"
 	"apigo/pkg/res"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,6 +14,7 @@ import (
 
 type LinkHundlerDeps struct {
 	LinkRepository *LinkRepository
+	Config         *configs.Config
 }
 
 type LinkHundler struct {
@@ -24,7 +27,7 @@ func NewLinkHundler(router *http.ServeMux, deps LinkHundlerDeps) {
 	}
 	router.HandleFunc("POST /link", handler.Create())
 	router.HandleFunc("GET /{hash}", handler.GoTo())
-	router.Handle("PATCH /link/{id}", middlewere.IsAuthed(handler.Update()))
+	router.Handle("PATCH /link/{id}", middlewere.IsAuthed(handler.Update(), deps.Config))
 	router.HandleFunc("DELETE /link/{id}", handler.Delete())
 }
 
@@ -66,6 +69,10 @@ func (handler *LinkHundler) GoTo() http.HandlerFunc {
 
 func (handler *LinkHundler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		email, ok := r.Context().Value(middlewere.ContextEmailKey).(string)
+		if ok {
+			fmt.Println(email)
+		}
 		body, err := req.HandleBody[LinkUpdateRequest](&w, r)
 		if err != nil {
 			return

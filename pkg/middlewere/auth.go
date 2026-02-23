@@ -1,18 +1,41 @@
 package middlewere
 
 import (
-	"fmt"
+	"apigo/configs"
+	"apigo/pkg/jwt"
+	"context"
 	"net/http"
 	"strings"
 )
 
-func IsAuthed(next http.Handler) http.Handler {
+type key string
+
+const (
+	ContextEmailKey key = "ContextEmailKey"
+)
+
+func writeUnauthed(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusUnauthorized)
+	w.Write([]byte(http.StatusText(http.StatusUnauthorized)))
+}
+
+func IsAuthed(next http.Handler, config *configs.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authedHeader := r.Header.Get("Authorization")
+		if !strings.HasPrefix(authedHeader, "Bearer ") {
+			writeUnauthed(w)
+			return
+		}
 		if authedHeader != "" {
 			token := strings.TrimPrefix(authedHeader, "Bearer ")
-			fmt.Println(token)
+			isValid, data := jwt.NewJWT(config.Auth.Sectet).Parse(token)
+			if !isValid {
+				writeUnauthed(w)
+				return
+			}
+			ctx := context.WithValue(r.Context(), ContextEmailKey, data.Email)
+			req := r.WithContext(ctx)
+			next.ServeHTTP(w, req)
 		}
-		next.ServeHTTP(w, r)
 	})
 }
