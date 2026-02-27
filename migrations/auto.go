@@ -2,6 +2,7 @@ package main
 
 import (
 	"apigo/internal/link"
+	"apigo/internal/stat"
 	"apigo/internal/user"
 	"os"
 
@@ -19,5 +20,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&link.Link{}, &user.User{})
+	db.AutoMigrate(&link.Link{}, &user.User{}, &stat.Stat{})
 }

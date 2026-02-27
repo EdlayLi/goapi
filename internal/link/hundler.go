@@ -2,6 +2,7 @@ package link
 
 import (
 	"apigo/configs"
+	"apigo/pkg/event"
 	"apigo/pkg/middlewere"
 	"apigo/pkg/req"
 	"apigo/pkg/res"
@@ -15,15 +16,18 @@ import (
 type LinkHundlerDeps struct {
 	LinkRepository *LinkRepository
 	Config         *configs.Config
+	EventBus       *event.EventBus
 }
 
 type LinkHundler struct {
 	LinkRepository *LinkRepository
+	EventBus       *event.EventBus
 }
 
 func NewLinkHundler(router *http.ServeMux, deps LinkHundlerDeps) {
 	handler := &LinkHundler{
 		LinkRepository: deps.LinkRepository,
+		EventBus:       deps.EventBus,
 	}
 	router.HandleFunc("POST /link", handler.Create())
 	router.HandleFunc("GET /{hash}", handler.GoTo())
@@ -65,6 +69,10 @@ func (handler *LinkHundler) GoTo() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		go handler.EventBus.Publesh(event.Event{
+			Type: event.EventLinkVisited,
+			Data: link.ID,
+		})
 		http.Redirect(w, r, link.Url, http.StatusTemporaryRedirect)
 	}
 }
