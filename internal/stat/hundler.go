@@ -3,14 +3,14 @@ package stat
 import (
 	"apigo/configs"
 	"apigo/pkg/middlewere"
-	"fmt"
+	"apigo/pkg/res"
 	"net/http"
 	"time"
 )
 
 const (
-	FilterByDay   = "day"
-	FilterByMonth = "month"
+	GroupByDay   = "day"
+	GroupByMonth = "month"
 )
 
 type StatHundlerDeps struct {
@@ -26,13 +26,13 @@ func NewStatHundler(router *http.ServeMux, deps StatHundlerDeps) {
 	handler := &StatHundler{
 		StatRepository: deps.StatRepository,
 	}
-	router.Handle("GET /stat", middlewere.IsAuthed(handler.GetAll(), deps.Config))
+	router.Handle("GET /stat", middlewere.IsAuthed(handler.GetStat(), deps.Config))
 }
 
-func (handler *StatHundler) GetAll() http.HandlerFunc {
+func (handler *StatHundler) GetStat() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		by := r.URL.Query().Get("by")
-		if by != FilterByDay && by != FilterByMonth {
+		if by != GroupByDay && by != GroupByMonth {
 			http.Error(w, "Invalid by param", http.StatusBadRequest)
 			return
 		}
@@ -46,7 +46,7 @@ func (handler *StatHundler) GetAll() http.HandlerFunc {
 			http.Error(w, "Invalid to param", http.StatusBadRequest)
 			return
 		}
-
-		fmt.Println(by, from, to)
+		stat := handler.StatRepository.GetStats(by, from, to)
+		res.Json(w, stat, http.StatusOK)
 	}
 }
