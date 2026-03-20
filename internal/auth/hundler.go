@@ -76,6 +76,6 @@ func (handler *AuthHundler) Register() http.HandlerFunc {
 		data := RegisterResponse{
 			Token: token,
 		}
-		res.Json(w, data, 200)
+		res.Json(w, data, 201)
 	}
 }
