@@ -8,7 +8,7 @@ import (
 	"apigo/internal/user"
 	"apigo/pkg/db"
 	"apigo/pkg/event"
-	"apigo/pkg/middlewere"
+	"apigo/pkg/middleware"
 	"fmt"
 	"net/http"
 )
@@ -32,28 +32,28 @@ func App() http.Handler {
 	})
 
 	//Handlers
-	auth.NewAuthHundler(router, auth.AuthHundlerDeps{
+	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
 		Config:      conf,
 		AuthService: authService,
 	})
 
-	link.NewLinkHundler(router, link.LinkHundlerDeps{
+	link.NewLinkHandler(router, link.LinkHandlerDeps{
 		LinkRepository: linkRepository,
 		Config:         conf,
 		EventBus:       eventBus,
 	})
 
-	stat.NewStatHundler(router, stat.StatHundlerDeps{
+	stat.NewStatHandler(router, stat.StatHandlerDeps{
 		StatRepository: statRepository,
 		Config:         conf,
 	})
 
 	go statService.AddClick()
 
-	//Midlewares
-	stack := middlewere.Chein(
-		middlewere.Cors,
-		middlewere.Logging,
+	//Middlewares
+	stack := middleware.Chain(
+		middleware.Cors,
+		middleware.Logging,
 	)
 
 	return stack(router)

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestJWTKreate(t *testing.T) {
+func TestJWTCreate(t *testing.T) {
 	const email = "11a@a.ru"
 	jwtService := jwt.NewJWT("s3cr3tK3y!@2026xYzQwErTyUiOpAsDfGhJkLzXcVbNm")
 	token, err := jwtService.Create(jwt.JWTData{

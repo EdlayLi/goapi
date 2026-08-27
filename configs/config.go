@@ -17,7 +17,7 @@ type DbConfig struct {
 }
 
 type AuthConfig struct {
-	Sectet string
+	Secret string
 }
 
 func LoadConfig() *Config {
@@ -30,7 +30,7 @@ func LoadConfig() *Config {
 			Dsn: os.Getenv("DSN"),
 		},
 		Auth: AuthConfig{
-			Sectet: os.Getenv("SECRET"),
+			Secret: os.Getenv("SECRET"),
 		},
 	}
 }

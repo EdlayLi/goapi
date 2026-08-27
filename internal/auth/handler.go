@@ -8,18 +8,18 @@ import (
 	"net/http"
 )
 
-type AuthHundlerDeps struct {
+type AuthHandlerDeps struct {
 	*configs.Config
 	*AuthService
 }
 
-type AuthHundler struct {
+type AuthHandler struct {
 	*configs.Config
 	*AuthService
 }
 
-func NewAuthHundler(router *http.ServeMux, deps AuthHundlerDeps) {
-	handler := &AuthHundler{
+func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
+	handler := &AuthHandler{
 		Config:      deps.Config,
 		AuthService: deps.AuthService,
 	}
@@ -27,7 +27,7 @@ func NewAuthHundler(router *http.ServeMux, deps AuthHundlerDeps) {
 	router.HandleFunc("POST /auth/register", handler.Register())
 }
 
-func (handler *AuthHundler) Login() http.HandlerFunc {
+func (handler *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[LoginRequest](&w, r)
 		if err != nil {
@@ -40,7 +40,7 @@ func (handler *AuthHundler) Login() http.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.NewJWT(handler.Config.Auth.Sectet).Create(jwt.JWTData{
+		token, err := jwt.NewJWT(handler.Config.Auth.Secret).Create(jwt.JWTData{
 			Email: email,
 		})
 		if err != nil {
@@ -54,7 +54,7 @@ func (handler *AuthHundler) Login() http.HandlerFunc {
 	}
 }
 
-func (handler *AuthHundler) Register() http.HandlerFunc {
+func (handler *AuthHandler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[RegisterRequest](&w, r)
 		if err != nil {
@@ -66,7 +66,7 @@ func (handler *AuthHundler) Register() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		token, err := jwt.NewJWT(handler.Config.Auth.Sectet).Create(jwt.JWTData{
+		token, err := jwt.NewJWT(handler.Config.Auth.Secret).Create(jwt.JWTData{
 			Email: email,
 		})
 		if err != nil {

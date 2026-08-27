@@ -3,7 +3,7 @@ package link
 import (
 	"apigo/configs"
 	"apigo/pkg/event"
-	"apigo/pkg/middlewere"
+	"apigo/pkg/middleware"
 	"apigo/pkg/req"
 	"apigo/pkg/res"
 	"fmt"
@@ -13,31 +13,31 @@ import (
 	"gorm.io/gorm"
 )
 
-type LinkHundlerDeps struct {
+type LinkHandlerDeps struct {
 	LinkRepository *LinkRepository
 	Config         *configs.Config
 	EventBus       *event.EventBus
 }
 
-type LinkHundler struct {
+type LinkHandler struct {
 	LinkRepository *LinkRepository
 	EventBus       *event.EventBus
 }
 
-func NewLinkHundler(router *http.ServeMux, deps LinkHundlerDeps) {
-	handler := &LinkHundler{
+func NewLinkHandler(router *http.ServeMux, deps LinkHandlerDeps) {
+	handler := &LinkHandler{
 		LinkRepository: deps.LinkRepository,
 		EventBus:       deps.EventBus,
 	}
-	router.Handle("POST /link", middlewere.IsAuthed(handler.Create(), deps.Config))
+	router.Handle("POST /link", middleware.IsAuthed(handler.Create(), deps.Config))
 	router.HandleFunc("GET /{hash}", handler.GoTo())
-	router.Handle("PATCH /link/{id}", middlewere.IsAuthed(handler.Update(), deps.Config))
-	router.Handle("DELETE /link/{id}", middlewere.IsAuthed(handler.Delete(), deps.Config))
-	router.Handle("GET /link", middlewere.IsAuthed(handler.GetAll(), deps.Config))
+	router.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
+	router.Handle("DELETE /link/{id}", middleware.IsAuthed(handler.Delete(), deps.Config))
+	router.Handle("GET /link", middleware.IsAuthed(handler.GetAll(), deps.Config))
 
 }
 
-func (handler *LinkHundler) Create() http.HandlerFunc {
+func (handler *LinkHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[LinkCreateRequest](&w, r)
 		if err != nil {
@@ -61,7 +61,7 @@ func (handler *LinkHundler) Create() http.HandlerFunc {
 	}
 }
 
-func (handler *LinkHundler) GoTo() http.HandlerFunc {
+func (handler *LinkHandler) GoTo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hash := r.PathValue("hash")
 		link, err := handler.LinkRepository.GetByHash(hash)
@@ -69,7 +69,7 @@ func (handler *LinkHundler) GoTo() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		go handler.EventBus.Publesh(event.Event{
+		go handler.EventBus.Publish(event.Event{
 			Type: event.EventLinkVisited,
 			Data: link.ID,
 		})
@@ -77,9 +77,9 @@ func (handler *LinkHundler) GoTo() http.HandlerFunc {
 	}
 }
 
-func (handler *LinkHundler) Update() http.HandlerFunc {
+func (handler *LinkHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		email, ok := r.Context().Value(middlewere.ContextEmailKey).(string)
+		email, ok := r.Context().Value(middleware.ContextEmailKey).(string)
 		if ok {
 			fmt.Println(email)
 		}
@@ -106,7 +106,7 @@ func (handler *LinkHundler) Update() http.HandlerFunc {
 	}
 }
 
-func (handler *LinkHundler) Delete() http.HandlerFunc {
+func (handler *LinkHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idString := r.PathValue("id")
 		id, err := strconv.Atoi(idString)
@@ -128,7 +128,7 @@ func (handler *LinkHundler) Delete() http.HandlerFunc {
 	}
 }
 
-func (handler *LinkHundler) GetAll() http.HandlerFunc {
+func (handler *LinkHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 		if err != nil {

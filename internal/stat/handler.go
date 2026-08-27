@@ -2,7 +2,7 @@ package stat
 
 import (
 	"apigo/configs"
-	"apigo/pkg/middlewere"
+	"apigo/pkg/middleware"
 	"apigo/pkg/res"
 	"net/http"
 	"time"
@@ -13,23 +13,23 @@ const (
 	GroupByMonth = "month"
 )
 
-type StatHundlerDeps struct {
+type StatHandlerDeps struct {
 	StatRepository *StatRepository
 	Config         *configs.Config
 }
 
-type StatHundler struct {
+type StatHandler struct {
 	StatRepository *StatRepository
 }
 
-func NewStatHundler(router *http.ServeMux, deps StatHundlerDeps) {
-	handler := &StatHundler{
+func NewStatHandler(router *http.ServeMux, deps StatHandlerDeps) {
+	handler := &StatHandler{
 		StatRepository: deps.StatRepository,
 	}
-	router.Handle("GET /stat", middlewere.IsAuthed(handler.GetStat(), deps.Config))
+	router.Handle("GET /stat", middleware.IsAuthed(handler.GetStat(), deps.Config))
 }
 
-func (handler *StatHundler) GetStat() http.HandlerFunc {
+func (handler *StatHandler) GetStat() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		by := r.URL.Query().Get("by")
 		if by != GroupByDay && by != GroupByMonth {

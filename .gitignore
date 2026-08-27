@@ -1,3 +1,32 @@
 /postgres-data
 .env
 /cmd/.env
+
+# AI assistants
+CLAUDE.md
+AGENTS.md
+.claude/
+.claude_*
+.claudecode/
+.codex/
+.cursor/
+.cursorrules
+.cursorignore
+.opencode/
+opencode.json
+opencode.jsonc
+.aider*
+.copilot/
+.github/copilot-instructions.md
+.windsurf/
+.windsurfrules
+.continue/
+.cline/
+.roo/
+.roomodes
+.zed/
+
+# IDE
+.idea/
+.vscode/
+.trunk/

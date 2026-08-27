@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func bootstrp() (*auth.AuthHundler, sqlmock.Sqlmock, error) {
+func bootstrap() (*auth.AuthHandler, sqlmock.Sqlmock, error) {
 	database, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, nil, err
@@ -33,10 +33,10 @@ func bootstrp() (*auth.AuthHundler, sqlmock.Sqlmock, error) {
 		DB: gormDb,
 	})
 
-	handler := auth.AuthHundler{
+	handler := auth.AuthHandler{
 		Config: &configs.Config{
 			Auth: configs.AuthConfig{
-				Sectet: "secret",
+				Secret: "secret",
 			},
 		},
 		AuthService: auth.NewAuthService(userRepo),
@@ -45,7 +45,7 @@ func bootstrp() (*auth.AuthHundler, sqlmock.Sqlmock, error) {
 }
 
 func TestLoginHandlerSuccess(t *testing.T) {
-	handler, mock, err := bootstrp()
+	handler, mock, err := bootstrap()
 	rows := sqlmock.NewRows([]string{"email", "password"}).
 		AddRow("test@test.ru", "$2a$10$79uHCRz4H/KYP.gugkgUF.LQROPi1wvjlnn8ClItH6c6A2sz4SMiS")
 	mock.ExpectQuery("SELECT").WillReturnRows(rows)
@@ -71,7 +71,7 @@ func TestLoginHandlerSuccess(t *testing.T) {
 }
 
 func TestRegisterHandlerSuccess(t *testing.T) {
-	handler, mock, err := bootstrp()
+	handler, mock, err := bootstrap()
 	rows := sqlmock.NewRows([]string{"email", "password", "name"})
 	mock.ExpectQuery("SELECT").WillReturnRows(rows)
 	mock.ExpectBegin()

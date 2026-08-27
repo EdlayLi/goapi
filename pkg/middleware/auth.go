@@ -1,4 +1,4 @@
-package middlewere
+package middleware
 
 import (
 	"apigo/configs"
@@ -28,7 +28,7 @@ func IsAuthed(next http.Handler, config *configs.Config) http.Handler {
 		}
 		if authedHeader != "" {
 			token := strings.TrimPrefix(authedHeader, "Bearer ")
-			isValid, data := jwt.NewJWT(config.Auth.Sectet).Parse(token)
+			isValid, data := jwt.NewJWT(config.Auth.Secret).Parse(token)
 			if !isValid {
 				writeUnauthed(w)
 				return

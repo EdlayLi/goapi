@@ -19,7 +19,7 @@ func NewEventBus() *EventBus {
 	}
 }
 
-func (e *EventBus) Publesh(event Event) {
+func (e *EventBus) Publish(event Event) {
 	e.bus <- event
 }
 
